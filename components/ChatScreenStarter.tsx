@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
     View,
     TextInput,
@@ -6,7 +6,7 @@ import {
     Text,
     TouchableOpacity,
     ActivityIndicator,
-    Platform,
+    Animated,
 } from "react-native";
 import { Audio } from "expo-av";
 import axios from "axios";
@@ -17,7 +17,9 @@ const ChatScreen = () => {
     const [input, setInput] = useState<any>("");
     const [recording, setRecording] = useState<any>(null);
     const [loading, setLoading] = useState(false);
+    const [displayedText, setDisplayedText] = useState<string>("");
     const userId = "user123"; // Replace with actual user ID
+    const fadeAnim = useRef(new Animated.Value(0)).current; // For fade-in animation
 
     const sendMessage = async () => {
         if (!input) return;
@@ -75,78 +77,6 @@ const ChatScreen = () => {
         }
     };
 
-    // const stopRecording = async () => {
-    //     if (!recording) {
-    //         console.error("No active recording found.");
-    //         return;
-    //     }
-
-    //     await recording.stopAndUnloadAsync(); // Ensure this is only called if recording exists
-    //     let uri = recording.getURI();
-
-    //     if (!uri) {
-    //         console.error("Recording URI is null.");
-    //         return;
-    //     }
-
-    //     setRecording(null);
-
-    //     // Convert to Blob
-    //     const formData: any = new FormData();
-    //     formData.append("file", {
-    //         uri: uri,
-    //         name: "audio.mp3",
-    //         type: "audio/mpeg",
-    //     });
-
-    //     console.log(formData);
-
-    //     try {
-    //         setLoading(true); // Show loading indicator during processing
-    //         console.log("MADE IT");
-
-    //         const response: any = await fetch(
-    //             `http://192.168.1.155:8002/chat/audio-stream?user_id=${userId}`, // Include user_id
-    //             {
-    //                 method: "POST",
-    //                 body: formData,
-    //                 headers: {
-    //                     "Content-Type": "multipart/form-data",
-    //                     Accept: "application/json", // Important for streaming
-    //                 },
-    //             }
-    //         );
-
-    //         console.log("MADE IT");
-    //         console.log(response);
-
-    //         let audioChunks = [];
-    //         const reader: any = response.data.getReader();
-
-    //         const processStream = async () => {
-    //             let { done, value } = await reader.read();
-
-    //             while (!done) {
-    //                 audioChunks.push(value);
-    //                 if (audioChunks.length > 2) {
-    //                     startStreamingPlayback(audioChunks);
-    //                 }
-    //                 ({ done, value } = await reader.read());
-    //             }
-
-    //             // Final playback for any remaining chunks
-    //             startStreamingPlayback(audioChunks);
-    //             setLoading(false);
-    //         };
-
-    //         processStream();
-    //         setLoading(false);
-    //     } catch (error) {
-    //         console.error("Error streaming audio:", error);
-    //         setLoading(false);
-    //     }
-    // };
-
     const stopRecording = async () => {
         if (!recording) {
             console.error("No active recording found.");
@@ -167,6 +97,9 @@ const ChatScreen = () => {
 
         setRecording(null);
 
+        // Clear the displayed text when a new recording starts
+        setDisplayedText("");
+
         // Prepare FormData
         const formData: any = new FormData();
         formData.append("file", {
@@ -178,62 +111,108 @@ const ChatScreen = () => {
         try {
             setLoading(true);
 
-            // Make a POST request to send audio and receive MP3 file
-            const response = await fetch(
-                `http://100.96.26.7:8002/chat/audio-stream?user_id=${userId}`,
+            // 1. Send Audio (Start, don't wait for completion)
+            const audioPromise = fetch(
+                `http://192.168.1.155:8002/chat/audio-stream?user_id=${userId}`,
                 {
                     method: "POST",
                     headers: {
                         "Content-Type": "multipart/form-data",
-                        Accept: "audio/mpeg", // Expect MP3 response
                     },
                     body: formData,
                 }
+            ); // Don't await here!
+
+            // 2. Fetch Text (Start immediately, don't wait for audio)
+            const textPromise = fetch(
+                `http://192.168.1.155:8002/chat/get-response?user_id=${userId}`
+            ); // Don't await here either!
+
+            // 3. Process Audio (in parallel with text display)
+            audioPromise
+                .then(async (audioResponse) => {
+                    if (!audioResponse.ok) {
+                        throw new Error(
+                            `HTTP error! Status: ${audioResponse.status}`
+                        );
+                    }
+
+                    const responseBlob = await audioResponse.blob();
+                    const fileUri = `${FileSystem.cacheDirectory}response.mp3`;
+
+                    const reader: any = new FileReader();
+                    reader.readAsDataURL(responseBlob);
+                    reader.onloadend = async () => {
+                        const base64Data = reader.result.split(",")[1];
+                        await FileSystem.writeAsStringAsync(
+                            fileUri,
+                            base64Data,
+                            {
+                                encoding: FileSystem.EncodingType.Base64,
+                            }
+                        );
+
+                        const { sound } = await Audio.Sound.createAsync({
+                            uri: fileUri,
+                        });
+                        await sound.playAsync(); // Play the sound
+                    };
+                })
+                .catch((error) => {
+                    console.error("Error processing audio:", error);
+                    setLoading(false); // Important: Set loading to false even if audio fails
+                });
+
+            // 4. Process and Display Text (in parallel with audio)
+            textPromise
+                .then(async (textResponse) => {
+                    if (!textResponse.ok) {
+                        throw new Error(
+                            `HTTP error! Status: ${textResponse.status}`
+                        );
+                    }
+
+                    const textData = await textResponse.json();
+                    const text = textData.response;
+
+                    let currentText = "";
+                    for (let i = 0; i < text.length; i++) {
+                        currentText += text[i];
+                        setDisplayedText(currentText);
+                        await new Promise((resolve) => setTimeout(resolve, 50));
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error fetching text:", error);
+                    setLoading(false); // Important: Set loading to false even if text fails
+                });
+
+            // The loading indicator will be set to false when *both* the audio and text promises have resolved or rejected.
+            Promise.all([audioPromise, textPromise]).finally(() =>
+                setLoading(false)
             );
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-
-            // Convert response to a Blob
-            const responseBlob = await response.blob();
-
-            // Define file path for the received MP3
-            const fileUri = `${FileSystem.cacheDirectory}response.mp3`;
-
-            // Save the MP3 file
-            const reader: any = new FileReader();
-            reader.readAsDataURL(responseBlob);
-            reader.onloadend = async () => {
-                const base64Data = reader.result.split(",")[1]; // Extract Base64 data
-                await FileSystem.writeAsStringAsync(fileUri, base64Data, {
-                    encoding: FileSystem.EncodingType.Base64,
-                });
-
-                // Check if file exists
-                const fileInfo = await FileSystem.getInfoAsync(fileUri);
-                console.log("File info:", fileInfo);
-
-                // Play the received MP3 file
-                const { sound } = await Audio.Sound.createAsync({
-                    uri: fileUri,
-                });
-                await sound.playAsync();
-            };
-
-            setLoading(false);
         } catch (error) {
-            console.error("Error receiving audio:", error);
-            setLoading(false);
+            console.error("General error in stopRecording:", error);
+            setLoading(false); // Make sure to set loading to false in the outer catch block as well
         }
     };
 
-    const startStreamingPlayback = async (chunks: BlobPart[]) => {
-        const blob = new Blob(chunks, { type: "audio/mpeg" });
-        const audioUrl = URL.createObjectURL(blob);
-        const { sound } = await Audio.Sound.createAsync({ uri: audioUrl });
-        await sound.playAsync();
+    // Function to fade in the text
+    const fadeInText = () => {
+        fadeAnim.setValue(0); // Reset opacity to 0
+        Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 1000, // Adjust duration here
+            useNativeDriver: true,
+        }).start();
     };
+
+    // Trigger fade-in animation when displayedText changes
+    useEffect(() => {
+        if (displayedText) {
+            fadeInText();
+        }
+    }, [displayedText]);
 
     return (
         <View style={{ marginVertical: 300 }}>
@@ -252,7 +231,7 @@ const ChatScreen = () => {
                             borderRadius: 10,
                         }}
                     >
-                        <Text>{item.text}</Text>
+                        <Text>{item.isUser ? item.text : displayedText}</Text>
                     </View>
                 )}
             />
@@ -280,6 +259,11 @@ const ChatScreen = () => {
             </View>
 
             {loading && <ActivityIndicator size="large" color="#0000ff" />}
+
+            {/* Fade-in text container */}
+            <Animated.View style={{ opacity: fadeAnim }}>
+                <Text>{displayedText}</Text>
+            </Animated.View>
         </View>
     );
 };
