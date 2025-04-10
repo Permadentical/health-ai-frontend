@@ -9,6 +9,7 @@ import {
     FlatList,
     StyleSheet,
     TouchableOpacity,
+    Text,
 } from "react-native";
 import { Measurements } from "@/constants/Measurements";
 import { ChatInput } from "@/components/AtAGlance/ChatInput";
@@ -17,11 +18,13 @@ import { AtAGlance } from "@/components/AtAGlance";
 import { useRecordingControls } from "@/hooks/useRecordingControls";
 import { useDismissKeyboardOnScroll } from "@/hooks/useDismissKeyboardOnScroll";
 import { Feather } from "@expo/vector-icons";
+
 const HEADER_HEIGHT = 100;
 
 export default function ChatScreen() {
     
     const tabBarHeight = Measurements.tabBar.TAB_HEIGHT;
+    const today = new Date().toLocaleDateString();
 
     const [messages, setMessages] = useState([
         { id: "1", text: "Hello, how can I help you today?", sender: "ai" },
@@ -90,6 +93,9 @@ export default function ChatScreen() {
                         <Feather name="message-circle" size={24} color={'#fff'}/>
                     }
                 </TouchableOpacity>
+                <View style={styles.todayDate}>
+                    <Text style={{fontSize: 25, color:'white'}}>{today}</Text>
+                </View>
             </View>
 
             <KeyboardAvoidingView
@@ -165,11 +171,17 @@ const styles = StyleSheet.create({
     // Adjust the icon position relative to the header
     switchChatIcon: {
         position: 'absolute',
-        top: 40, // for example, 20 pixels from the top of the header
+        top: 45, // for example, 20 pixels from the top of the header
         left: 20, // adjust as needed
         padding: 8,
         backgroundColor: 'green',
         borderRadius: 20,
         zIndex: 101, // Make sure it stays above the header background if needed
     },
+    todayDate: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        top: 15
+    }
 });
