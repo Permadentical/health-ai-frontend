@@ -48,7 +48,7 @@ export default function ChatScreen() {
     const handleInputFocus = () => {
         Animated.timing(atAGlanceOpacity, {
             toValue: 0,
-            duration: 150,
+            duration: 100,
             useNativeDriver: true,
         }).start(() => {
             setShowChatHistory(true);
@@ -56,13 +56,12 @@ export default function ChatScreen() {
     };
 
     const handleBackToAAG = () => {
+        if (showChatHistory) setShowChatHistory(false)
         Animated.timing(atAGlanceOpacity, {
             toValue: 1,
-            duration: 150,
+            duration: 100,
             useNativeDriver: true,
-        }).start(() => {
-            setShowChatHistory(false);
-        });
+        }).start();
     };
 
     const handleSend = () => {
@@ -149,7 +148,7 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         height: HEADER_HEIGHT,
-        backgroundColor: 'blue',
+        backgroundColor: 'grey',
         zIndex: 100, // Keeps header above other content
         elevation: 4, // For Android shadow
         // Optionally, add a shadow for iOS:
@@ -174,7 +173,7 @@ const styles = StyleSheet.create({
         top: 45, // for example, 20 pixels from the top of the header
         left: 20, // adjust as needed
         padding: 8,
-        backgroundColor: 'green',
+        backgroundColor: '#6A96FF',
         borderRadius: 20,
         zIndex: 101, // Make sure it stays above the header background if needed
     },
