@@ -1,9 +1,6 @@
 import React from "react";
-import { router } from "expo-router";
-import { Button } from "@rneui/themed";
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native";
 import ChatBar from "@/components/ChatBar";
-import { Measurements } from "@/constants/Measurements";
 
 export default function Home() {
 

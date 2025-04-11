@@ -1,29 +1,37 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
+type ThemeColors = {
+  background: string;
+  text: string;
+  header: string;
+  primary: string;
+  accent: string;
+  card: string;
+  button: string;
+  tint: string,
+};
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+const LightColors: ThemeColors = {
+  background: '#FFFFFF',
+  text: '#00171F',
+  header: '#003459',
+  primary: '#007EA7',
+  accent: '#00A8E8',
+  card: '#FFFFFF',
+  button: '#003459',
+  tint: '#007EA7',
+};
 
-export const Colors = {
-  light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
-    MessageInputAddIcon: tintColorLight,
-    defaultLight: 'silver'
-  },
-  dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
-    MessageInputAddIcon: tintColorLight,
-  },
+const DarkColors: ThemeColors = {
+  background: '#00171F',
+  text: '#FFFFFF',
+  header: '#003459',
+  primary: '#00A8E8',
+  accent: '#007EA7',
+  card: '#003459',
+  button: '#00A8E8',
+  tint: '#00A8E8',
+};
+
+export const Colors: Record<"light" | "dark", ThemeColors> = {
+  light: LightColors,
+  dark: DarkColors,
 };
