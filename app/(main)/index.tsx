@@ -18,17 +18,16 @@ import { AtAGlance } from "@/components/AtAGlance";
 import { useRecordingControls } from "@/hooks/useRecordingControls";
 import { Feather } from "@expo/vector-icons";
 import { Colors, ThemeColors } from "@/constants/Colors";
-
-const HEADER_HEIGHT = 100;
+import { Header } from "@/components/AtAGlance/Header";
 
 export default function ChatScreen() {
-    
+    const HEADER_HEIGHT = 100;
     const tabBarHeight = Measurements.tabBar.TAB_HEIGHT;
     const today = new Date().toLocaleDateString();
 
     const colorScheme = useColorScheme()
     const theme: ThemeColors = Colors[colorScheme ?? "light"];
-    const styles = getStyles(theme)
+    const styles = getStyles(theme, HEADER_HEIGHT)
 
     const [messages, setMessages] = useState([
         { id: "1", text: "Hello, how can I help you today?", sender: "ai" },
@@ -41,7 +40,6 @@ export default function ChatScreen() {
 
     // Animation value for AtAGlance fade out/in
     const atAGlanceOpacity = useRef(new Animated.Value(1)).current;
-
     const flatListRef = useRef<FlatList>(null);
 
     // Extracted recording logic
@@ -49,7 +47,7 @@ export default function ChatScreen() {
 
     // Keyboard handling and input focus
     const handleInputFocus = () => {
-        Animated.timing(atAGlanceOpacity, {
+        Animated.timing(atAGlanceOpacity, { 
             toValue: 0,
             duration: 100,
             useNativeDriver: true,
@@ -86,19 +84,13 @@ export default function ChatScreen() {
 
     return (
         <View style={{ flex: 1, marginBottom: tabBarHeight}}>
-            <View style={styles.header}>
-                {/* Overlay handling for mic long press, etc. */}
-                {/** ... overlay with fadeAnim if needed ... */}
-                <TouchableOpacity style={styles.switchChatIcon} onPress={handleSwitchChatIcon}>
-                    {showChatHistory ? 
-                        <Feather name="eye" size={24} color={theme.background}/> :
-                        <Feather name="message-circle" size={24} color={theme.background}/>
-                    }
-                </TouchableOpacity>
-                <View style={styles.todayDate}>
-                    <Text style={{fontSize: 25, color:theme.text}}>{today}</Text>
-                </View>
-            </View>
+            <Header
+                headerHeight={HEADER_HEIGHT}
+                todayDate={today}
+                showChatHistory={showChatHistory} 
+                theme={theme} 
+                onhandleSwitchChatIconPress={handleSwitchChatIcon}
+            />
 
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -139,27 +131,13 @@ export default function ChatScreen() {
     );
 }
 
-const getStyles = (theme: ThemeColors) => StyleSheet.create({
+const getStyles = (theme: ThemeColors, header_height: number) => StyleSheet.create({
     container: {
         flex: 1,
-        marginTop: HEADER_HEIGHT,
+        marginTop: header_height,
         backgroundColor: theme.background
     },
-    header: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: HEADER_HEIGHT,
-        zIndex: 100, // Keeps header above other content
-        elevation: 4, // Android shadow
-        shadowColor: '#000', // iOS shadow (?)
-        backgroundColor: theme.header,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 2,
-        justifyContent: 'center',
-    },
+
     inner: {
         flex: 1,
         justifyContent: "flex-end",
@@ -171,19 +149,4 @@ const getStyles = (theme: ThemeColors) => StyleSheet.create({
         padding: 6,
         top: 5,
     },
-    switchChatIcon: {
-        position: 'absolute',
-        top: 45,
-        left: 20,
-        padding: 8,
-        backgroundColor: theme.button,
-        borderRadius: 20,
-        zIndex: 101,
-    },
-    todayDate: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        top: 15
-    }
 });
