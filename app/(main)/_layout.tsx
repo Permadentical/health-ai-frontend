@@ -11,7 +11,7 @@ import { Measurements } from "@/constants/Measurements";
 
 export default function TabLayout() {
     const colorScheme = useColorScheme();
-
+    const theme = Colors[colorScheme ?? "light"];
     const fadeAnim = useRef(new Animated.Value(1)).current; // Initial opacity
 
     // Function to animate the transition
@@ -27,7 +27,7 @@ export default function TabLayout() {
     return (
         <Tabs
             screenOptions={{
-                tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+                tabBarActiveTintColor: theme.tint,
                 headerShown: false,
                 tabBarButton: HapticTab,
                 tabBarBackground: TabBarBackground,
