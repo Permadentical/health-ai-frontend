@@ -1,6 +1,5 @@
 import React from "react";
-import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native";
-import ChatBar from "@/components/ChatBar";
+import { StyleSheet, Text, View } from "react-native";
 
 export default function Home() {
 
@@ -10,12 +9,7 @@ export default function Home() {
 
     return (
         <View style={styles.container}>
-            <KeyboardAvoidingView 
-                style={{flex: 1}}
-                keyboardVerticalOffset={70}
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-                <ChatBar onShouldSendMessage={getCompletion}/>
-            </KeyboardAvoidingView>
+            <Text style={{flex: 1, left: 50, top: 100}}>EMPTY</Text>
         </View>);
 }
 

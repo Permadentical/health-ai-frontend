@@ -1,23 +1,23 @@
 // src/screens/ChatScreen.tsx
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import {
     View,
     KeyboardAvoidingView,
-    Keyboard,
     Platform,
     Animated,
     FlatList,
     StyleSheet,
     TouchableOpacity,
     Text,
+    useColorScheme,
 } from "react-native";
 import { Measurements } from "@/constants/Measurements";
 import { ChatInput } from "@/components/AtAGlance/ChatInput";
 import { ChatMessage } from "@/components/AtAGlance/ChatMessage";
 import { AtAGlance } from "@/components/AtAGlance";
 import { useRecordingControls } from "@/hooks/useRecordingControls";
-import { useDismissKeyboardOnScroll } from "@/hooks/useDismissKeyboardOnScroll";
 import { Feather } from "@expo/vector-icons";
+import { Colors, ThemeColors } from "@/constants/Colors";
 
 const HEADER_HEIGHT = 100;
 
@@ -25,6 +25,10 @@ export default function ChatScreen() {
     
     const tabBarHeight = Measurements.tabBar.TAB_HEIGHT;
     const today = new Date().toLocaleDateString();
+
+    const colorScheme = useColorScheme()
+    const theme: ThemeColors = Colors[colorScheme ?? "light"];
+    const styles = getStyles(theme)
 
     const [messages, setMessages] = useState([
         { id: "1", text: "Hello, how can I help you today?", sender: "ai" },
@@ -39,7 +43,6 @@ export default function ChatScreen() {
     const atAGlanceOpacity = useRef(new Animated.Value(1)).current;
 
     const flatListRef = useRef<FlatList>(null);
-    const keyboardDismissHandlers = useDismissKeyboardOnScroll();
 
     // Extracted recording logic
     const { showAnimation, fadeAnim, handlePressIn, handlePressOut } = useRecordingControls();
@@ -78,22 +81,22 @@ export default function ChatScreen() {
     }
 
     const renderMessage = ({ item }: any) => (
-        <ChatMessage text={item.text} isUser={item.sender === "user"} />
+        <ChatMessage text={item.text} isUser={item.sender === "user"} theme={theme} />
     );
 
     return (
-        <View style={{ flex: 1, marginBottom: tabBarHeight + 20 }}>
+        <View style={{ flex: 1, marginBottom: tabBarHeight}}>
             <View style={styles.header}>
                 {/* Overlay handling for mic long press, etc. */}
                 {/** ... overlay with fadeAnim if needed ... */}
                 <TouchableOpacity style={styles.switchChatIcon} onPress={handleSwitchChatIcon}>
                     {showChatHistory ? 
-                        <Feather name="eye" size={24} color={'#fff'}/> :
-                        <Feather name="message-circle" size={24} color={'#fff'}/>
+                        <Feather name="eye" size={24} color={theme.background}/> :
+                        <Feather name="message-circle" size={24} color={theme.background}/>
                     }
                 </TouchableOpacity>
                 <View style={styles.todayDate}>
-                    <Text style={{fontSize: 25, color:'white'}}>{today}</Text>
+                    <Text style={{fontSize: 25, color:theme.text}}>{today}</Text>
                 </View>
             </View>
 
@@ -122,6 +125,7 @@ export default function ChatScreen() {
 
                     <ChatInput
                         value={inputText}
+                        theme={theme}
                         onChangeText={setInputText}
                         onSend={handleSend}
                         onInputFocus={handleInputFocus}
@@ -135,24 +139,22 @@ export default function ChatScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
-        // Add a top margin equal to the header height so content starts below it
         marginTop: HEADER_HEIGHT,
+        backgroundColor: theme.background
     },
-    // Fixed header style: explicitly set a height and position it at the top
     header: {
         position: 'absolute',
         top: 0,
         left: 0,
         right: 0,
         height: HEADER_HEIGHT,
-        backgroundColor: 'grey',
         zIndex: 100, // Keeps header above other content
-        elevation: 4, // For Android shadow
-        // Optionally, add a shadow for iOS:
-        shadowColor: '#000',
+        elevation: 4, // Android shadow
+        shadowColor: '#000', // iOS shadow (?)
+        backgroundColor: theme.header,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.3,
         shadowRadius: 2,
@@ -162,20 +164,21 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "flex-end",
         paddingHorizontal: 20,
+        marginBottom: 10,
     },
     messagesList: { 
         flexGrow: 1, 
-        padding: 16 
+        padding: 6,
+        top: 5,
     },
-    // Adjust the icon position relative to the header
     switchChatIcon: {
         position: 'absolute',
-        top: 45, // for example, 20 pixels from the top of the header
-        left: 20, // adjust as needed
+        top: 45,
+        left: 20,
         padding: 8,
-        backgroundColor: '#6A96FF',
+        backgroundColor: theme.button,
         borderRadius: 20,
-        zIndex: 101, // Make sure it stays above the header background if needed
+        zIndex: 101,
     },
     todayDate: {
         flex: 1,
