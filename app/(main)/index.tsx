@@ -19,6 +19,7 @@ import { useRecordingControls } from "@/hooks/useRecordingControls";
 import { Feather } from "@expo/vector-icons";
 import { Colors, ThemeColors } from "@/constants/Colors";
 import { Header } from "@/components/AtAGlance/Header";
+import BlocksContainer from "./glance";
 
 export default function ChatScreen() {
     const HEADER_HEIGHT = 100;
@@ -30,11 +31,21 @@ export default function ChatScreen() {
     const styles = getStyles(theme, HEADER_HEIGHT)
 
     const [messages, setMessages] = useState([
+        // ... your messages (add more for testing scroll)
         { id: "1", text: "Hello, how can I help you today?", sender: "ai" },
         { id: "2", text: "Hi there!", sender: "user" },
-        { id: "3", text: "Hello, how can I help you today?", sender: "ai" },
-        // ...other messages
+        { id: "3", text: "I need help with my account.", sender: "user" },
+        { id: "4", text: "Okay, what specifically about your account?", sender: "ai" },
+        { id: "5", text: "I can't log in.", sender: "user" },
+        { id: "6", text: "Let's try resetting your password.", sender: "ai" },
+        { id: "7", text: "How do I do that?", sender: "user" },
+        { id: "8", text: "Go to the login screen and click 'Forgot Password'.", sender: "ai" },
+        { id: "9", text: "Okay, thanks!", sender: "user" },
+        { id: "10", text: "You're welcome! Let me know if that works.", sender: "ai" },
+        { id: "11", text: "It worked!", sender: "user" },
+        { id: "12", text: "Great!", sender: "ai" },
     ]);
+
     const [inputText, setInputText] = useState("");
     const [showChatHistory, setShowChatHistory] = useState<boolean>(false);
 
@@ -101,8 +112,8 @@ export default function ChatScreen() {
                 <View style={styles.inner}>
                     {/** AtAGlance vs. Chat History */}
                     {!showChatHistory ? (
-                        <Animated.View style={{ opacity: atAGlanceOpacity }}>
-                            <AtAGlance />
+                        <Animated.View style={[styles.blocksContainer, { opacity: atAGlanceOpacity}]}>
+                            <BlocksContainer />
                         </Animated.View>
                     ) : (
                         <FlatList
@@ -110,21 +121,25 @@ export default function ChatScreen() {
                             data={messages}
                             keyExtractor={(item) => item.id}
                             renderItem={renderMessage}
-                            inverted
                             contentContainerStyle={styles.messagesList}
+                            showsHorizontalScrollIndicator={false}
+                            showsVerticalScrollIndicator={false}
+                            style={{paddingHorizontal:20}}
                         />
                     )}
 
-                    <ChatInput
-                        value={inputText}
-                        theme={theme}
-                        onChangeText={setInputText}
-                        onSend={handleSend}
-                        onInputFocus={handleInputFocus}
-                        onPressIn={handlePressIn}
-                        onPressOut={handlePressOut}
-                        showAnimation={showAnimation}
-                    />
+                    <View style={{paddingHorizontal: 15}}>
+                        <ChatInput
+                            value={inputText}
+                            theme={theme}
+                            onChangeText={setInputText}
+                            onSend={handleSend}
+                            onInputFocus={handleInputFocus}
+                            onPressIn={handlePressIn}
+                            onPressOut={handlePressOut}
+                            showAnimation={showAnimation}
+                        />
+                    </View>
                 </View>
             </KeyboardAvoidingView>
         </View>
@@ -137,11 +152,12 @@ const getStyles = (theme: ThemeColors, header_height: number) => StyleSheet.crea
         marginTop: header_height,
         backgroundColor: theme.background
     },
-
+    blocksContainer: {
+        flex: 1, 
+    },
     inner: {
         flex: 1,
         justifyContent: "flex-end",
-        paddingHorizontal: 20,
         marginBottom: 10,
     },
     messagesList: { 

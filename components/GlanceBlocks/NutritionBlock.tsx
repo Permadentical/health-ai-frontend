@@ -1,3 +1,4 @@
+import { ThemeColors } from "@/constants/Colors";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import Animated, {
@@ -6,7 +7,14 @@ import Animated, {
     withTiming,
 } from "react-native-reanimated";
 
-export function NutritionBlock() {
+type NutritionBlockProps = {
+    theme: ThemeColors
+}
+
+export function NutritionBlock({theme}: NutritionBlockProps) {
+
+    const styles = getStyles(theme)
+
     // Calorie Block Animation
     const calorieWidth = useSharedValue(340);
     const calorieHeight = useSharedValue(80);
@@ -121,7 +129,7 @@ export function NutritionBlock() {
                         )}
                     </Animated.View>
                 </Pressable>
-                {/* Macro Sub-Blocks (Side-by-Side) */}
+                {/* Macro Sub-Blocks (Side-by-Side)
                 <View style={styles.macroContainer}>
                     <Pressable onPress={handleMacroPressLeft}>
                         <Animated.View
@@ -163,15 +171,15 @@ export function NutritionBlock() {
                             { width: addMacroWidth, height: addMacroHeight },
                         ]}
                     ></Animated.View>
-                </Pressable>
+                </Pressable> */}
             </View>
         </ScrollView>
     );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: ThemeColors) => StyleSheet.create({
     calorieBlock: {
-        backgroundColor: "pink",
+        backgroundColor: theme.cardAccentGreen,
         borderRadius: 20,
         padding: 10,
         justifyContent: "center",

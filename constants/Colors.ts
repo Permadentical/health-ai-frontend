@@ -9,6 +9,12 @@ export type ThemeColors = {
   tint: string,
   chatBox: string,
   chatBoxAlernate: string,
+  cardAccentOrange: string,
+  cardAccentGreen: string,
+  cardAccentRed: string,
+  cardAccentPurple: string,
+  cardAccentYellow: string,
+  cardAccentTeal: string,
 };
 
 const LightColors: ThemeColors = {
@@ -21,7 +27,13 @@ const LightColors: ThemeColors = {
   button: '#1976D2',        // buttons using the primary blue
   tint: '#2196F3',          // tint for iconography, etc.
   chatBox: '#25D366',       // preserved chat box color (green)
-  chatBoxAlernate: '#FFFFFF' // preserved alternate chat box color
+  chatBoxAlernate: '#FFFFFF', // preserved alternate chat box color
+  cardAccentOrange: '#FF9800',
+  cardAccentGreen: '#4CAF50',
+  cardAccentRed: '#F44336',
+  cardAccentPurple: '#9C27B0',
+  cardAccentYellow: '#FFEB3B',
+  cardAccentTeal: '#00BCD4'
 };
 
 const DarkColors: ThemeColors = {
@@ -34,7 +46,13 @@ const DarkColors: ThemeColors = {
   button: '#1E88E5',        // matching primary for interactive elements
   tint: '#42A5F5',          // tint for icons and other elements
   chatBox: '#075E54',       // preserved chat box color for dark mode
-  chatBoxAlernate: '#2C363F'  // preserved alternate chat box color
+  chatBoxAlernate: '#2C363F',  // preserved alternate chat box color
+  cardAccentOrange: '#F57C00',
+  cardAccentGreen: '#43A047',
+  cardAccentRed: '#E53935',
+  cardAccentPurple: '#8E24AA',
+  cardAccentYellow: '#FDD835',
+  cardAccentTeal: '#00ACC1'
 };
 
 export const Colors: Record<"light" | "dark", ThemeColors> = {

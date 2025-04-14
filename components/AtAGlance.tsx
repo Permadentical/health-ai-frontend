@@ -1,14 +1,19 @@
+import { ThemeColors } from "@/constants/Colors";
 import { ExerciseBlock } from "./GlanceBlocks/ExerciseBlock";
 import { NutritionBlock } from "./GlanceBlocks/NutritionBlock";
 import { ScrollView, View } from "react-native";
 
-export function AtAGlance() {
+type GlanceProps = {
+    theme: ThemeColors;
+}
+
+export function AtAGlance({theme}: GlanceProps) {
+
+
     return (
-        <ScrollView style={{ paddingVertical: 100 }}>
+        <ScrollView style={{ paddingVertical: 80 }}>
             <View style={{}}>
-                <NutritionBlock />
-            </View>
-            <View>
+                <NutritionBlock theme={theme}/>
                 <ExerciseBlock />
             </View>
         </ScrollView>

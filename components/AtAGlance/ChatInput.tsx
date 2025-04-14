@@ -66,7 +66,7 @@ const getStyles = (theme: ThemeColors) => StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 8,
         backgroundColor: theme.card,
-        borderRadius: 25,
+        borderRadius: 24,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.1,
