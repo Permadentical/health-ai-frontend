@@ -24,7 +24,6 @@ import BlocksContainer from "./glance";
 export default function ChatScreen() {
     const HEADER_HEIGHT = 100;
     const tabBarHeight = Measurements.tabBar.TAB_HEIGHT;
-    const today = new Date().toLocaleDateString();
 
     const colorScheme = useColorScheme()
     const theme: ThemeColors = Colors[colorScheme ?? "light"];
@@ -97,7 +96,6 @@ export default function ChatScreen() {
         <View style={{ flex: 1, marginBottom: tabBarHeight}}>
             <Header
                 headerHeight={HEADER_HEIGHT}
-                todayDate={today}
                 showChatHistory={showChatHistory} 
                 theme={theme} 
                 onhandleSwitchChatIconPress={handleSwitchChatIcon}

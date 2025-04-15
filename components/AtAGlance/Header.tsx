@@ -1,71 +1,69 @@
 import { ThemeColors } from "@/constants/Colors"
 import { Feather } from "@expo/vector-icons";
-import { useState } from "react";
-import {Text, StyleSheet, TouchableOpacity, View } from "react-native"
-import DatePicker, { RangeOutput, SingleOutput } from 'react-native-neat-date-picker'
-
+import { useCallback, useState } from "react";
+import { Text, StyleSheet, TouchableOpacity, View } from "react-native"
+import { enGB, registerTranslation, DatePickerModal } from 'react-native-paper-dates'
+import { CalendarDate } from "react-native-paper-dates/lib/typescript/Date/Calendar";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 type HeaderProps = {
     headerHeight: number
-    todayDate: string
     showChatHistory: boolean
     theme: ThemeColors
     onhandleSwitchChatIconPress: () => void;
-} 
+}
 
-export const Header = ({headerHeight, todayDate, showChatHistory, theme, onhandleSwitchChatIconPress}: HeaderProps) => {
+const formatDate = (input: any) => {
+    const date = new Date(input);
+    const options: any = { weekday: 'short', month: 'short', day: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
+}
+
+export const Header = ({ headerHeight, showChatHistory, theme, onhandleSwitchChatIconPress }: HeaderProps) => {
+    registerTranslation('en', enGB)
+
     const styles = getStyles(theme, headerHeight)
 
-    const [showDatePickerSingle, setShowDatePickerSingle] = useState(false)
+    const [date, setDate] = useState<CalendarDate>(new Date());
+    const [open, setOpen] = useState(false);
 
-    const [date, setDate] = useState('')
-    const [startDate, setStartDate] = useState('')
-    const [endDate, setEndDate] = useState('')
+    const onDismiss = useCallback(() => {
+        setOpen(false);
+    }, []);
 
-    const openDatePickerSingle = () => setShowDatePickerSingle(true)
+    const onConfirm = useCallback((params: any) => {
+        setOpen(false);
+        setDate(params.date);
+        // TODO: add backend call to fetch the correct date texts/cals!
+    }, []);
 
-    const onCancelSingle = () => {
-        // You should close the modal here
-        setShowDatePickerSingle(false)
-    }
-
-    const onConfirmSingle = (output: SingleOutput) => {
-        // You should close the modal here
-        setShowDatePickerSingle(false)
-
-        // The parameter 'output' is an object containing date and dateString (for single mode).
-        // For range mode, the output contains startDate, startDateString, endDate, and endDateString
-        console.log(output)
-        setDate(output.dateString ?? '')
-    }
 
     return (
-        <View style={{flex:1}}>
-            <DatePicker
-                isVisible={showDatePickerSingle}
-                mode={'single'}
-                onCancel={onCancelSingle}
-                onConfirm={onConfirmSingle}
-                modalStyles={{flex:1, zIndex: 109}}
-            />
-            <View style={styles.header}>
-                {/* Overlay handling for mic long press, etc. */}
-                {/** ... overlay with fadeAnim if needed ... */}
-                <TouchableOpacity style={styles.switchChatIcon} onPress={onhandleSwitchChatIconPress}>
-                    {showChatHistory ?
-                        <Feather name="eye" size={24} color={theme.background}/> :
-                        <Feather name="message-circle" size={24} color={theme.background}/>
-                    }
+        <View style={styles.header}>
+            <TouchableOpacity style={styles.switchChatIcon} onPress={onhandleSwitchChatIconPress}>
+                {showChatHistory ?
+                    <Feather name="eye" size={24} color={theme.background} /> :
+                    <Feather name="message-circle" size={24} color={theme.background} />
+                }
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.extraFuncIcon} onPress={() => console.log("clicked")}>
+                {showChatHistory ?
+                    <Feather name="search" size={24} color={theme.background} /> :
+                    <Feather name="filter" style={{ top: 1 }} size={24} color={theme.background} />
+                }
+            </TouchableOpacity>
+            <SafeAreaProvider>
+                <TouchableOpacity style={styles.todayDate} onPress={() => setOpen(true)}>
+                    <Text style={{ fontSize: 25, color: theme.text }}>{formatDate(date)}</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.extraFuncIcon} onPress={() => console.log("clicked")}>
-                    {showChatHistory ?
-                        <Feather name="search" size={24} color={theme.background}/> :
-                        <Feather name="filter" style={{top:1}} size={24} color={theme.background}/>
-                    }
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.todayDate} onPress={openDatePickerSingle}>
-                    <Text style={{fontSize: 25, color:theme.text}}>{todayDate}</Text>
-                </TouchableOpacity>
-            </View>
+                <DatePickerModal
+                    locale="en"
+                    mode="single"
+                    visible={open}
+                    onDismiss={onDismiss}
+                    date={date}
+                    onConfirm={onConfirm}
+                />
+            </SafeAreaProvider>
         </View>
     )
 }
