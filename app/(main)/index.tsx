@@ -28,7 +28,6 @@ export default function ChatScreen() {
     const styles = getStyles(theme, HEADER_HEIGHT)
 
     const [messages, setMessages] = useState([
-        // ... your messages (add more for testing scroll)
         { id: "1", text: "Hello, how can I help you today?", sender: "ai" },
         { id: "2", text: "Hi there!", sender: "user" },
         { id: "3", text: "I need help with my account.", sender: "user" },
