@@ -61,6 +61,9 @@ export default function ChatScreen() {
             useNativeDriver: true,
         }).start(() => {
             setShowChatHistory(true);
+            setTimeout(() => {
+                flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+            }, 300);
         });
     };
 
@@ -115,6 +118,7 @@ export default function ChatScreen() {
                         <FlatList
                             ref={flatListRef}
                             data={messages}
+                            inverted
                             keyExtractor={(item) => item.id}
                             renderItem={renderMessage}
                             contentContainerStyle={styles.messagesList}
