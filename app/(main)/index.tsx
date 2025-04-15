@@ -14,12 +14,10 @@ import {
 import { Measurements } from "@/constants/Measurements";
 import { ChatInput } from "@/components/AtAGlance/ChatInput";
 import { ChatMessage } from "@/components/AtAGlance/ChatMessage";
-import { AtAGlance } from "@/components/AtAGlance";
 import { useRecordingControls } from "@/hooks/useRecordingControls";
-import { Feather } from "@expo/vector-icons";
 import { Colors, ThemeColors } from "@/constants/Colors";
 import { Header } from "@/components/AtAGlance/Header";
-import BlocksContainer from "./glance";
+import BlocksContainer from "../../components/AtAGlance/BlocksContainer";
 
 export default function ChatScreen() {
     const HEADER_HEIGHT = 100;
@@ -111,7 +109,7 @@ export default function ChatScreen() {
                     {/** AtAGlance vs. Chat History */}
                     {!showChatHistory ? (
                         <Animated.View style={[styles.blocksContainer, { opacity: atAGlanceOpacity}]}>
-                            <BlocksContainer />
+                            <BlocksContainer theme={theme} />
                         </Animated.View>
                     ) : (
                         <FlatList

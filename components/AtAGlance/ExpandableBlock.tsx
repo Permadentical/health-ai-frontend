@@ -1,3 +1,4 @@
+import { Feather } from '@expo/vector-icons';
 import React, { useState, useRef } from 'react';
 import { 
   View, 
@@ -17,6 +18,7 @@ type ExpandableBlockProps = {
   backgroundColor: string,
   title: string,
   mainValue: string,
+  mainValueTidBit ?: string,
   mainIcon: string,
   subtitle: string,
   extraInfo: string,
@@ -28,15 +30,16 @@ type ExpandableBlockProps = {
 }
 
 const ExpandableBlock = ({ 
-  size = 'small', // 'small' or 'medium'
+  size, // 'small' or 'medium'
   position,
-  backgroundColor = '#FFDF6B', 
-  title = 'PROGRESS',
-  mainValue = '543',
-  mainIcon = 'book',
-  subtitle = 'Out of 1,225 pages',
-  extraInfo = '#5 among friends',
-  progress = 0.45, // Between 0 and 1
+  backgroundColor, 
+  title,
+  mainValue,
+  mainValueTidBit = "",
+  mainIcon,
+  subtitle,
+  extraInfo,
+  progress, // Between 0 and 1
   avatars = [], // Array of avatar image sources
   additionalContent = null, // Content to show when expanded
   onExpand, // Callback when block expands
@@ -47,7 +50,7 @@ const ExpandableBlock = ({
   
   // Calculate initial dimensions based on the size prop
   const initialWidth = size === 'small' ? width * 0.44 : width * 0.92;
-  const initialHeight = size === 'small' ? width * 0.44 : width * 0.32;
+  const initialHeight = size === 'small' ? width * 0.44 : width * 0.44;
   const expandedWidth = width * 0.92;
   const expandedHeight = height * 0.8;
   
@@ -109,22 +112,8 @@ const ExpandableBlock = ({
     : 0;
   
   // Determine which icon to render
-  const renderIcon = () => {
-    switch(mainIcon) {
-      case 'book':
-        return (
-          <View style={styles.iconContainer}>
-            <Text style={styles.bookIcon}>≡</Text>
-            <Text style={styles.bookCover}>📕</Text>
-          </View>
-        );
-      case 'clock':
-        return <Text style={styles.icon}>⏱</Text>;
-      case 'lightning':
-        return <Text style={styles.icon}>⚡</Text>;
-      default:
-        return <Text style={styles.icon}>📊</Text>;
-    }
+  const renderIcon = (icon: any) => {
+   return <Feather name={icon} size={20} style={styles.icon} /> 
   };
   
   return (
@@ -151,14 +140,16 @@ const ExpandableBlock = ({
           </View>
           
           <View style={styles.mainContent}>
-            {renderIcon()}
-            <Text style={styles.mainValue}>{mainValue}</Text>
+            {renderIcon(mainIcon)}
+            <Text style={styles.mainValue}>
+                {mainValue}
+                {size === "medium" && (
+                    <Text style={styles.mainValueTidBit}>{"  " + mainValueTidBit}</Text>
+                )}
+            </Text>
+
           </View>
           
-          <View style={styles.subtitleContainer}>
-            <Text style={styles.subtitle}>{subtitle}</Text>
-            <Text style={styles.extraInfo}>{extraInfo}</Text>
-          </View>
           
           {progress > 0 && (
             <View style={styles.progressContainer}>
@@ -166,20 +157,6 @@ const ExpandableBlock = ({
                 <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
               </View>
               
-              {avatars.length > 0 && (
-                <View style={styles.avatarsContainer}>
-                  {avatars.map((avatar: any, index: number) => (
-                    <Image 
-                      key={index}
-                      source={avatar} 
-                      style={[
-                        styles.avatar,
-                        { marginLeft: index > 0 ? -10 : 0 }
-                      ]} 
-                    />
-                  ))}
-                </View>
-              )}
             </View>
           )}
         </Animated.View>
@@ -198,7 +175,7 @@ const ExpandableBlock = ({
           </View>
           
           <View style={styles.expandedMainContent}>
-            {renderIcon()}
+            {renderIcon(mainIcon)}
             <Text style={styles.expandedMainValue}>{mainValue}</Text>
             <Text style={styles.expandedSubtitle}>{subtitle}</Text>
           </View>
@@ -264,6 +241,9 @@ const styles = StyleSheet.create({
     fontSize: 48,
     fontWeight: '900',
     color: '#000',
+  },
+  mainValueTidBit: {
+    fontSize: 24,
   },
   subtitleContainer: {
     marginVertical: 4,
