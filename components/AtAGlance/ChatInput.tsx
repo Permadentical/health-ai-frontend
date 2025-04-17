@@ -1,6 +1,5 @@
-// src/components/ChatInput.tsx
 import React from "react";
-import { TextInput, TouchableOpacity, View, StyleSheet, Animated } from "react-native";
+import { TextInput, TouchableOpacity, View, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { AnimatedMicrophone } from "../AnimatedMicrophone";
 import { ThemeColors } from "@/constants/Colors";
@@ -11,9 +10,8 @@ type ChatInputProps = {
     onChangeText: (text: string) => void;
     onSend: () => void;
     onInputFocus: () => void;
-    onPressIn: () => void;
-    onPressOut: () => void;
-    showAnimation: boolean;
+    startRecording: () => void;
+    stopRecording: () => void;
 };
 
 export const ChatInput = ({
@@ -22,12 +20,11 @@ export const ChatInput = ({
     onChangeText,
     onSend,
     onInputFocus,
-    onPressIn,
-    onPressOut,
-    showAnimation,
+    startRecording,
+    stopRecording,
 }: ChatInputProps) => {
+    const styles = getStyles(theme);
 
-    const styles = getStyles(theme)
     return (
         <View style={styles.inputContainer}>
             <TextInput
@@ -41,20 +38,27 @@ export const ChatInput = ({
                 multiline={false}
                 onFocus={onInputFocus}
             />
-            <TouchableOpacity
-                onPress={() => value.trim() && onSend()}
-                onPressIn={value.trim() ? onSend : onPressIn}
-                onPressOut={onPressOut}
-                style={[styles.iconButton, value.trim() ? styles.sendButton : styles.micButton]}
-            >
-                {showAnimation ? (
-                    <AnimatedMicrophone />
-                ) : value.trim() ? (
-                    <Feather name="send" size={20} color={theme.background} style={{ right: 1, top: 1 }} /> // wtf is wrong with send icon centering?
+
+            <View style={[styles.iconButton, value.trim() ? styles.sendButton : styles.micButton]}>
+                {value.trim() ? (
+                    <TouchableOpacity onPress={onSend}>
+                        <Feather name="send" size={20} color={theme.background} style={{ right: 1, top: 1 }} />
+                    </TouchableOpacity>
                 ) : (
-                    <Feather name="mic" size={20} color={theme.background} />
+                    <AnimatedMicrophone
+                        size={20}
+                        style={{ width: 36, height: 36, justifyContent: 'center', alignItems: 'center' }}
+                        onStart={() => {
+                            startRecording();
+                            onInputFocus(); 
+                        }}
+                        onStop={stopRecording}
+                        theme={theme}
+                    />
+
+
                 )}
-            </TouchableOpacity>
+            </View>
         </View>
     );
 };

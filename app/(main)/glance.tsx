@@ -1,7 +1,5 @@
-import { Text } from "react-native";
+import { Text } from "react-native"
 
-export default function GlanceScreen() {
-    return (
-        <Text style={{left: 100, top: 200, color: 'white'}}>Hello</Text>
-    )
+export const Glance = () => {
+  return <Text style={{left: 50, top: 200}}>HELLO</Text>
 }

@@ -50,7 +50,7 @@ export default function ChatScreen() {
     const flatListRef = useRef<FlatList>(null);
 
     // Extracted recording logic
-    const { showAnimation, fadeAnim, handlePressIn, handlePressOut } = useRecordingControls();
+    const { startRecording, stopRecording } = useRecordingControls();
 
     // Keyboard handling and input focus
     const handleInputFocus = () => {
@@ -134,9 +134,8 @@ export default function ChatScreen() {
                             onChangeText={setInputText}
                             onSend={handleSend}
                             onInputFocus={handleInputFocus}
-                            onPressIn={handlePressIn}
-                            onPressOut={handlePressOut}
-                            showAnimation={showAnimation}
+                            startRecording={startRecording}
+                            stopRecording={stopRecording}
                         />
                     </View>
                 </View>
