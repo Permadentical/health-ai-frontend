@@ -211,7 +211,7 @@ export const AnimatedMicrophone: React.FC<AnimatedMicrophoneProps> = ({
           strokeWidth={2}
           strokeLinejoin="round"
           strokeLinecap="round"
-          transform={`translate(${(buttonSize * 2 + 80) / 2}, ${(buttonSize * 2 + 80) / 2}) rotate(45)`}
+          transform={`translate(${(buttonSize * 2 + 80) / 2}, ${(buttonSize * 2 + 80) / 2}) rotate(60)`}
           animatedProps={animatedWaveProps}
         />
       </Svg>
