@@ -15,6 +15,8 @@ export type ThemeColors = {
   cardAccentPurple: string,
   cardAccentYellow: string,
   cardAccentTeal: string,
+  border: string,
+  tabIconDefault?: string; // Optional for tab icons
 };
 
 const LightColors: ThemeColors = {
@@ -33,7 +35,8 @@ const LightColors: ThemeColors = {
   cardAccentRed: '#F44336',
   cardAccentPurple: '#9C27B0',
   cardAccentYellow: '#FFEB3B',
-  cardAccentTeal: '#00BCD4'
+  cardAccentTeal: '#00BCD4',
+  border: '#d1d5db',
 };
 
 const DarkColors: ThemeColors = {
@@ -52,7 +55,8 @@ const DarkColors: ThemeColors = {
   cardAccentRed: '#E53935',
   cardAccentPurple: '#8E24AA',
   cardAccentYellow: '#FDD835',
-  cardAccentTeal: '#00ACC1'
+  cardAccentTeal: '#00ACC1',
+  border: '#4B5563',        // darker border for contrast
 };
 
 export const Colors: Record<"light" | "dark", ThemeColors> = {
