@@ -1,7 +1,8 @@
 {
   "expo": {
     "name": "Health-Port",
-    "slug": "Health-Port",
+    "owner": "happygao",
+    "slug": "health-ai",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -13,6 +14,7 @@
       "bundleIdentifier": "com.anonymous.Health-Port"
     },
     "android": {
+      "package": "com.anonymous.Health-Port",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -33,10 +35,18 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-web-browser",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "947e85ab-5659-45ed-95b9-d8b1616e0287"
+      }
     }
   }
 }

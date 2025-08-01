@@ -15,6 +15,10 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Link, router } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { useGoogleAuth } from '@/hooks/useGoogleAuth';
+import { saveAuth } from '@/components/saveAuth';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 
 const { width, height } = Dimensions.get('window');
 
@@ -29,16 +33,36 @@ export default function LoginView() {
     const placeholderColor = useThemeColor({ light: '#6b7280', dark: '#9ca3af' }, 'tabIconDefault');
     const colorScheme = useColorScheme();
 
+    useFocusEffect(
+        useCallback(() => { 
+            setUsername('');
+            setPassword('');
+            setSecureTest(true);
+        }, [])
+    );
+
     const handleLogin = () => {
         // Handle login logic here
         console.log('Login clicked', { username, password });
         router.replace("/(main)/profile");
+        
     };
 
-    const handleGoogleSignIn = () => {
-        // Handle Google sign-in logic here
-        console.log('Google sign-in clicked');
+    const handleGoogleLoginSuccess = (token: string, user: any) => {
+        console.log("Google login successfully，Token:", token);
+        console.log("User info：", user);
+    
+        router.replace("/(main)/profile");
+        saveAuth(token, user)
+            .then(() => {
+                console.log("save auth successfully");
+            })
+            .catch((error) => {
+                console.error("save auth failed:", error);
+            });
     };
+
+    const { handleGoogleSignIn, isLoading, error, isReady } = useGoogleAuth(handleGoogleLoginSuccess);
 
     const clearUsername = () => {
         setUsername('');
@@ -223,7 +247,7 @@ export default function LoginView() {
 
                     {/* Divider */}
                     <ThemedView style={styles.dividerContainer}>
-                        <Text style={styles.dividerText}>Or</Text>
+                        <Text style={styles.dividerText}>or</Text>
                     </ThemedView>
 
                     {/* Google Sign In */}
@@ -233,7 +257,7 @@ export default function LoginView() {
                             style={styles.googleIcon}
                             resizeMode="contain"
                         />
-                        <Text style={styles.googleButtonText}>Sign up with Google</Text>
+                        <Text style={styles.googleButtonText}>Sign in with Google</Text>
                     </TouchableOpacity>
 
                 </SafeAreaView>

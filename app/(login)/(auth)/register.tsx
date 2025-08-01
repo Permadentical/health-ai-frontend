@@ -15,14 +15,27 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { useGoogleAuth } from '@/hooks/useGoogleAuth';
+import { saveAuth } from '@/components/saveAuth';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 
 const { width, height } = Dimensions.get('window');
 
+
+
 export default function RegisterView() {
     const [username, setUsername] = useState('');
+    const [usernameExists, setUsernameExists] = useState(false);
+    const [checking, setChecking] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [secureTest, setSecureTest] = useState(true);
+    const [errors, setErrors] = useState({
+    username: '',
+    email: '',
+    password: '',
+  });
 
     const backgroundColor = useThemeColor({}, 'background');
     const textColor = useThemeColor({}, 'text');
@@ -30,10 +43,81 @@ export default function RegisterView() {
     const placeholderColor = useThemeColor({ light: '#6b7280', dark: '#9ca3af' }, 'tabIconDefault');
     const colorScheme = useColorScheme();
 
-    const handleRegister = () => {
-        console.log('Register clicked', { username, email, password });
+
+    useFocusEffect(
+    useCallback(() => {
+        setUsername('');
+        setEmail('');
+        setPassword('');
+        setErrors({ username: '', email: '', password: '' });
+        setSecureTest(true);
+    }, [])
+    );
+
+    const handleRegister = async () => {
+        // Here you would typically send the registration data to your backend
+        const newErrors = {
+            username: '',
+            email: '',
+            password: '',
+        };
+
+        if (username.length <= 6) {
+            newErrors.username = 'Username must be longer than 6 characters';
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            newErrors.email = 'Please enter a valid email address';
+        }
+
+        if (password.length <= 6) {
+            newErrors.password = 'Password must be longer than 6 characters';
+        }
+
+        setErrors(newErrors);
+
+        const isValid = !newErrors.username && !newErrors.email && !newErrors.password;
+        if (!isValid) {
+            return;
+        }
+
+        setChecking(true);
+         try {
+            const res = await fetch(`https://your-api.com/check-username?username=${username}`);
+            const data = await res.json();
+            if (data.exists) {
+            setErrors((prev) => ({
+                ...prev,
+                username: 'Username already taken',
+            }));
+            return;
+            }
+        } catch (error) {
+            console.error('Error checking username', error);
+            // Optional: Show a general error message
+        } finally {
+            setChecking(false);
+        }
+
         router.replace("/(main)/profile");
     };
+
+    const handleGoogleLoginSuccess = (token: string, user: any) => {
+        console.log("Google login successfully，Token:", token);
+        console.log("User info：", user);
+    
+        router.replace("/(main)/profile");
+        saveAuth(token, user)
+            .then(() => {
+                console.log("save auth successfully");
+            })
+            .catch((error) => {
+                console.error("save auth failed:", error);
+            });
+    };
+
+    const { handleGoogleSignIn, isLoading, error, isReady  } = useGoogleAuth(handleGoogleLoginSuccess);
 
     const styles = StyleSheet.create({
         container: {
@@ -93,12 +177,49 @@ export default function RegisterView() {
             borderRadius: 8,
             justifyContent: 'center',
             alignItems: 'center',
-            marginTop: 108,
+            marginTop: 68,
+            marginBottom: 12,
         },
         registerButtonText: {
             color: '#ffffff',
             fontSize: 16,
             fontWeight: '600',
+        },
+        dividerContainer: {
+            width: '100%',
+            alignItems: 'center',
+            marginBottom: 12,
+        },
+        dividerText: {
+            color: placeholderColor,
+            fontSize: 14,
+        },
+        googleButton: {
+            width: '100%',
+            height: 48,
+            borderWidth: 1,
+            borderColor: borderColor,
+            borderRadius: 8,
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'transparent',
+        },
+        googleButtonText: {
+            color: textColor,
+            fontSize: 16,
+            fontWeight: '500',
+            marginLeft: 12,
+        },
+        googleIcon: {
+            width: 24,
+            height: 24,
+        },
+        errorText: {
+        color: 'red',
+        fontSize: 13,
+        marginTop: 4,
+        height: 18, // 固定高度，防止 layout shift
         },
     });
 
@@ -130,6 +251,7 @@ export default function RegisterView() {
                                 onChangeText={setUsername}
                                 autoCapitalize="none"
                             />
+                            {errors.username ? <Text style={styles.errorText}>{errors.username}</Text> : null}
                         </View>
 
                         <View style={styles.inputWrapper}>
@@ -142,6 +264,7 @@ export default function RegisterView() {
                                 keyboardType="email-address"
                                 autoCapitalize="none"
                             />
+                            {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
                         </View>
 
                         <View style={styles.inputWrapper}>
@@ -159,6 +282,7 @@ export default function RegisterView() {
                                     {secureTest ? '👁️' : '🙈'}
                                 </Text>
                             </TouchableOpacity>
+                             {errors.password ? <Text style={styles.errorText}>{errors.password}</Text> : null}
                         </View>
                     </ThemedView>
 
@@ -172,6 +296,19 @@ export default function RegisterView() {
                     {/* Register Button */}
                     <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
                         <Text style={styles.registerButtonText}>Sign Up</Text>
+                    </TouchableOpacity>
+
+                    <ThemedView style={ styles.dividerContainer}>
+                        <Text style={styles.dividerText}>or</Text>
+                    </ThemedView>
+
+                    <TouchableOpacity style={styles.googleButton} onPress={handleGoogleSignIn}>
+                        <Image
+                            source={require("@/assets/images/google/icons8-google-96.png")}
+                            style={styles.googleIcon}
+                            resizeMode="contain"
+                        />
+                        <Text style={styles.googleButtonText}>Sign in with Google</Text>
                     </TouchableOpacity>
                 </SafeAreaView>
             </ThemedView>
