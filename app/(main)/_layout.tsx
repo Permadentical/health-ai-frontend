@@ -9,7 +9,14 @@ import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Measurements } from "@/constants/Measurements";
 
+import { useContext, useEffect } from "react";
+import { useRouter } from "expo-router";
+import { AuthContext } from "@/providers/AuthProvider";
+
 export default function TabLayout() {
+
+    const { user, isLoading } = useContext(AuthContext);
+    const router = useRouter();
     const colorScheme = useColorScheme();
     const theme = Colors[colorScheme ?? "light"];
     const fadeAnim = useRef(new Animated.Value(1)).current; // Initial opacity
@@ -23,6 +30,16 @@ export default function TabLayout() {
             useNativeDriver: true,
         }).start();
     };
+
+    useEffect(() => {
+        if (!isLoading && !user) {
+
+        router.replace("/(login)/(auth)");
+        }
+        
+    }, [user, isLoading]);
+
+    if (isLoading || !user) return null;
 
     return (
         <Tabs

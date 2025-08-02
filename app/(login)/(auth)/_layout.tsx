@@ -47,8 +47,22 @@
 
 import { Stack } from "expo-router";
 import React from "react";
+import { useContext, useEffect } from "react";
+import { useRouter } from "expo-router";
+import { AuthContext } from "@/providers/AuthProvider";
 
 export default function AuthLayout() {
+
+    const { user, isLoading } = useContext(AuthContext);
+    const router = useRouter();
+
+     useEffect(() => {
+        if (!isLoading && user) {
+            router.replace("/(main)/profile");
+        }
+    }, [isLoading, user]);
+
+    if (isLoading) return null;
     return (
         <Stack screenOptions={{ headerShown: false }} />
     );

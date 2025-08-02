@@ -19,6 +19,9 @@ import { useGoogleAuth } from '@/hooks/useGoogleAuth';
 import { saveAuth } from '@/components/saveAuth';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
+import { useContext } from 'react';
+import { AuthContext } from '@/providers/AuthProvider';
+
 
 const { width, height } = Dimensions.get('window');
 
@@ -26,12 +29,14 @@ export default function LoginView() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [secureTest, setSecureTest] = useState(true);
+    const { setUser } = useContext(AuthContext);
 
     const backgroundColor = useThemeColor({}, 'background');
     const textColor = useThemeColor({}, 'text');
     const borderColor = useThemeColor({ light: '#d1d5db', dark: '#4b5563' }, 'border');
     const placeholderColor = useThemeColor({ light: '#6b7280', dark: '#9ca3af' }, 'tabIconDefault');
     const colorScheme = useColorScheme();
+
 
     useFocusEffect(
         useCallback(() => { 
@@ -48,18 +53,18 @@ export default function LoginView() {
         
     };
 
-    const handleGoogleLoginSuccess = (token: string, user: any) => {
-        console.log("Google login successfully，Token:", token);
+    const handleGoogleLoginSuccess = async (access_token: string, refresh_token: string, user: any) => {
+        try{
         console.log("User info：", user);
     
-        router.replace("/(main)/profile");
-        saveAuth(token, user)
-            .then(() => {
-                console.log("save auth successfully");
-            })
-            .catch((error) => {
+        await saveAuth(access_token, refresh_token, user)
+        setUser(user);
+        console.log("save auth successfully");
+        } catch(error) {
                 console.error("save auth failed:", error);
-            });
+            };
+
+        router.push("/(main)/profile");
     };
 
     const { handleGoogleSignIn, isLoading, error, isReady } = useGoogleAuth(handleGoogleLoginSuccess);

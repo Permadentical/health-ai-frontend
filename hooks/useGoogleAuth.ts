@@ -4,19 +4,15 @@ import { useEffect } from "react";
 import * as AuthSession from 'expo-auth-session';
 import { Platform } from 'react-native';
 import { useState } from 'react';
+import Constants from 'expo-constants';
 
 WebBrowser.maybeCompleteAuthSession();
 
 
-const EXPO_PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_EXPO_BASE_URL || "http://localhost:8081";
-const EXPO_PUBLIC_SCHEME = "myapp://"
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
-const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "51973558324-l98r8hhf9h0os6845cbj8pctt33drip1.apps.googleusercontent.com";
-const IOS_CLIENT_ID = process.env.NEXT_PUBLIC_IOS_CLIENT_ID || "51973558324-o3ba0038r964kfp1tsnb2d3hmumr7gma.apps.googleusercontent.com";
-const ANDROID_CLIENT_ID = process.env.NEXT_PUBLIC_ANDROID_CLIENT_ID || "51973558324-o13n6g06qbssfelresp277q6bg8ljogm.apps.googleusercontent.com";
-export const useGoogleAuth = (onLoginSuccess: (token: string, user: any) => void) => {
+export const useGoogleAuth = (onLoginSuccess: (access_token: string, refresh_token: string, user: any) => void) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const { googleClientId, androidClientId, iosClientId, apiBaseUrl } = Constants.expoConfig?.extra ?? {};
 
     const redirectUri = AuthSession.makeRedirectUri({
         scheme: "myapp", 
@@ -26,9 +22,9 @@ export const useGoogleAuth = (onLoginSuccess: (token: string, user: any) => void
     
     const [request, response, promptAsync] = Google.useAuthRequest(
         {
-            webClientId: GOOGLE_CLIENT_ID,
-            androidClientId: ANDROID_CLIENT_ID,
-            iosClientId: IOS_CLIENT_ID,
+            webClientId: googleClientId,
+            androidClientId: androidClientId,
+            iosClientId: iosClientId,
             redirectUri: redirectUri,
             scopes: ['profile', 'email', 'openid'],
             responseType: 'token',
@@ -82,7 +78,7 @@ export const useGoogleAuth = (onLoginSuccess: (token: string, user: any) => void
             }
 
             // send access token and user info to backend
-            const response = await fetch(`${API_BASE_URL}/auth/google`, {
+            const response = await fetch(`${apiBaseUrl}/auth/google`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -101,7 +97,7 @@ export const useGoogleAuth = (onLoginSuccess: (token: string, user: any) => void
             console.log('🎉 Backend Auth Success:', data);
 
             // call the success handler
-            onLoginSuccess(data.token, data.user);
+            onLoginSuccess(data.access_token, data.refresh_token, data.user);
             
         } catch (error) {
             console.error('💥 Auth Processing Error:', error);
