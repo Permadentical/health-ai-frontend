@@ -37,7 +37,7 @@ export const getAuth = async () => {
   }
 };
 
-export const logout = async () => {
+export const delAuth = async () => {
   if (Platform.OS === 'web') {
     await AsyncStorage.removeItem("access_token");
     await AsyncStorage.removeItem("refresh_token");

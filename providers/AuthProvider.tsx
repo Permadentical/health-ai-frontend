@@ -12,7 +12,6 @@ type User = {
 };
 
 type Settings = {
-  // 你的设置字段，示例：
   theme?: string;
   notificationsEnabled?: boolean;
 
@@ -34,7 +33,7 @@ export const AuthContext = createContext<AuthContextType>({
   settings: null,
 });
 
-import { getAuth, logout } from "@/components/saveAuth";
+import { getAuth, delAuth } from "@/components/saveAuth";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { apiBaseUrl } = Constants.expoConfig?.extra ?? {};
@@ -61,26 +60,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // load user data from backend
             console.log("userData111", userData);
             setUser(userData);
-            // You can handle settings data here if needed
-            const setting = await fetch(`${apiBaseUrl}/users/${userData.id}/settings`, {
-              headers: { Authorization: `Bearer ${token}` },  
-            });
-            if (setting.ok) {
-              const settingsData = await setting.json();
-              console.log("settingsData", settingsData);
-              setSettings(settingsData);
-              
-            } else {
-              console.error("Failed to fetch settings");
-            }
-
           } else {
             setUser(null);
-            await logout();
+            await delAuth();
           }
         } catch (e) {
           setUser(null);
-          await logout();
+          await delAuth();
         }
       } else {
         console.log("you did not login yet");

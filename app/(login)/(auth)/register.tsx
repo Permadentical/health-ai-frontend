@@ -21,6 +21,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
 import { useContext } from 'react';
 import { AuthContext } from '@/providers/AuthProvider';
+import { fetchSettings } from '@/hooks/useSettings';
 
 const { width, height } = Dimensions.get('window');
 
@@ -39,7 +40,7 @@ export default function RegisterView() {
     password: '',
   });
 
-    const { setUser } = useContext(AuthContext);
+    const { setUser, setSettings } = useContext(AuthContext);
     const backgroundColor = useThemeColor({}, 'background');
     const textColor = useThemeColor({}, 'text');
     const borderColor = useThemeColor({ light: '#d1d5db', dark: '#4b5563' }, 'border');
@@ -111,7 +112,9 @@ export default function RegisterView() {
         console.log("User info：", user);
     
         await saveAuth(access_token, refresh_token, user)
+        const settings = await fetchSettings(user.id, access_token);
         setUser(user);
+        setSettings(settings);
         console.log("save auth successfully");
         } catch(error) {
                 console.error("save auth failed:", error);

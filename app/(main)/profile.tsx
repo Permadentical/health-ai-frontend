@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
     StyleSheet,
     SafeAreaView,
@@ -8,10 +8,17 @@ import {
     TouchableOpacity,
     Switch,
     Image,
+    Alert,
 } from "react-native";
 import FeatherIcon from "react-native-vector-icons/Feather";
+import { AuthContext } from "@/providers/AuthProvider";
+import {delAuth, getAuth} from "@/components/saveAuth";
+import { router } from "expo-router";
+import Constants from "expo-constants";
 
 export default function Example() {
+    const {setUser, setSettings, settings, user} = useContext(AuthContext);
+    const {apiBaseUrl } = Constants.expoConfig?.extra ?? {}
     const [form, setForm] = useState({
         darkMode: false,
         emailNotifications: true,
@@ -21,12 +28,57 @@ export default function Example() {
     const OPTIONS_STACK_KEYS = {'metrics': ['metrics_2']}
     const [stack, setStack] = useState(['main'])
 
+     // Logout handler function (replace with real API call)
+    const logout = async () => {
+        console.log("Logout button pressed");
+        try {
+            const { token: authToken } = await getAuth();
+            if (!authToken) {
+                Alert.alert("You are not logged in.");
+                return;
+            }
+            
+        try {
+                // 1. Call backend to blacklist token (optional but recommended)
+                const res = await fetch(`${apiBaseUrl}/auth/logout`, {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${authToken}`, 
+                    },
+                });
+                
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                }
+                const data = await res.json();
+                if (data.success) {
+                    console.log("User logged out successfully from backend.");
+                    // 2. Clear local auth info
+                    setUser(null);
+                    setSettings(null);
+                    await delAuth(); 
+                    // 3. Redirect to login screen
+                    router.replace("/(login)/(auth)");
+                    console.log("User logged out successfully.");
+                }
+            } catch (error) {
+                console.error("Logout failed:", error);
+            }
+    }
+        catch (error) {
+            console.error("Error during logout:", error);
+        };
+    }
+
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
             <View style={styles.profile}>
                 <TouchableOpacity
                     onPress={() => {
                         // TODO: handle onPress of the image. Change Image!
+                        console.log("Profile image pressed");
+                        console.log("Current settings:", settings);
+                        console.log("Current user:", user);
                     }}
                 >
                     <View style={styles.profileAvatarWrapper}>
@@ -272,6 +324,16 @@ export default function Example() {
                             size={20}
                         />
                     </TouchableOpacity>
+
+                                        {/* Add Logout button */}
+                    <TouchableOpacity onPress={logout} style={[styles.row, styles.logoutRow]}>
+                        <View style={[styles.rowIcon, { backgroundColor: "#ff3b30" }]}>
+                            <FeatherIcon color="#fff" name="log-out" size={20} />
+                        </View>
+
+                        <Text style={[styles.rowLabel, styles.logoutLabel]}>Logout</Text>
+                        <View style={styles.rowSpacer} />
+                    </TouchableOpacity>
                 </View>
             </ScrollView>
         </SafeAreaView>
@@ -360,5 +422,13 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         flexShrink: 1,
         flexBasis: 0,
+    },
+    logoutRow: {
+        marginTop: 20,
+        backgroundColor: "#ffe6e6",
+    },
+    logoutLabel: {
+        color: "#ff3b30",
+        fontWeight: "700",
     },
 });

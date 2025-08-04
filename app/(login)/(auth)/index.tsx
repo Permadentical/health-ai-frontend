@@ -21,7 +21,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
 import { useContext } from 'react';
 import { AuthContext } from '@/providers/AuthProvider';
-
+import { fetchSettings } from '@/hooks/useSettings';
 
 const { width, height } = Dimensions.get('window');
 
@@ -29,7 +29,7 @@ export default function LoginView() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [secureTest, setSecureTest] = useState(true);
-    const { setUser } = useContext(AuthContext);
+    const { setUser, setSettings } = useContext(AuthContext);
 
     const backgroundColor = useThemeColor({}, 'background');
     const textColor = useThemeColor({}, 'text');
@@ -58,7 +58,9 @@ export default function LoginView() {
         console.log("User info：", user);
     
         await saveAuth(access_token, refresh_token, user)
+        const settings = await fetchSettings(user.id, access_token);
         setUser(user);
+        setSettings(settings);
         console.log("save auth successfully");
         } catch(error) {
                 console.error("save auth failed:", error);
