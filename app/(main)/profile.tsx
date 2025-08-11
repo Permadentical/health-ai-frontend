@@ -12,9 +12,10 @@ import {
 } from "react-native";
 import FeatherIcon from "react-native-vector-icons/Feather";
 import { AuthContext } from "@/providers/AuthProvider";
-import {delAuth, getAuth} from "@/components/saveAuth";
+import {delAuth, getAuth} from "@/components/AuthManager";
 import { router } from "expo-router";
 import Constants from "expo-constants";
+import {Settings} from "@/providers/AuthProvider";
 
 export default function Example() {
     const {setUser, setSettings, settings, user} = useContext(AuthContext);
@@ -107,10 +108,13 @@ export default function Example() {
                 </TouchableOpacity>
 
                 <View>
-                    <Text style={styles.profileName}>John Doe</Text>
+                    <Text style={styles.profileName}>{user?.username}</Text>
 
                     <Text style={styles.profileAddress}>
                         123 Maple Street. Anytown, PA 17101
+                    </Text>
+                    <Text style={styles.profileAddress}>
+                        180 {settings?.length_units}, 75 {settings?.weight_units}
                     </Text>
                 </View>
             </View>
@@ -158,10 +162,14 @@ export default function Example() {
                         <View style={styles.rowSpacer} />
 
                         <Switch
-                            onValueChange={(darkMode) =>
-                                setForm({ ...form, darkMode })
-                            }
-                            value={form.darkMode}
+                            onValueChange={(darkMode) => {
+                            setForm({ ...form, darkMode });
+                            setSettings({
+                                ...settings,
+                                theme: darkMode ? 'dark' : 'light',
+                            });
+                            }}  
+                            value={settings?.theme === 'dark'}
                         />
                     </View>
 

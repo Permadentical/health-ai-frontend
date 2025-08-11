@@ -11,10 +11,12 @@ type User = {
   // Add other user properties as needed
 };
 
-type Settings = {
+export interface Settings  {
   theme?: string;
   notificationsEnabled?: boolean;
-
+  weight_units?: string;
+  length_units?: string;
+  id?: number;
 };
 
 type AuthContextType = {
@@ -33,14 +35,29 @@ export const AuthContext = createContext<AuthContextType>({
   settings: null,
 });
 
-import { getAuth, delAuth } from "@/components/saveAuth";
+import { getAuth, delAuth } from "@/components/AuthManager";
+import { getSettings, saveSettings, delSettings } from "@/components/SettingManager";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { apiBaseUrl } = Constants.expoConfig?.extra ?? {};
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [settings, setSettings] = useState<Settings | null>(null);
+
   
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        const savedSettings = await getSettings();
+        console.log("Loaded settings:", savedSettings);
+        setSettings(savedSettings);
+      } catch (error) {
+        console.error("Error loading settings:", error);
+      }
+    }
+
+    loadSettings();
+  }, []);
 
   useEffect(() => {
     async function loadUser() {
@@ -58,19 +75,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (res.ok) {
             const userData = await res.json();
             // load user data from backend
-            console.log("userData111", userData);
             setUser(userData);
           } else {
             setUser(null);
+            setSettings(null);
             await delAuth();
+            await delSettings();
           }
         } catch (e) {
           setUser(null);
+          setSettings(null);
           await delAuth();
+          await delSettings();
         }
       } else {
         console.log("you did not login yet");
         setUser(null);
+        setSettings(null);
       }
 
       setIsLoading(false);

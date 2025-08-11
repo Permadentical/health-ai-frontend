@@ -16,12 +16,13 @@ import { router } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useGoogleAuth } from '@/hooks/useGoogleAuth';
-import { saveAuth } from '@/components/saveAuth';
+import { saveAuth } from '@/components/AuthManager';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
 import { useContext } from 'react';
 import { AuthContext } from '@/providers/AuthProvider';
 import { fetchSettings } from '@/hooks/useSettings';
+import { saveSettings } from '@/components/SettingManager';
 
 const { width, height } = Dimensions.get('window');
 
@@ -111,9 +112,12 @@ export default function RegisterView() {
         try{
         console.log("User info：", user);
     
-        await saveAuth(access_token, refresh_token, user)
-        const settings = await fetchSettings(user.id, access_token);
+        await saveAuth(access_token, refresh_token, user);
         setUser(user);
+
+        const settings = await fetchSettings(user.id, access_token);
+        
+        await saveSettings(settings);
         setSettings(settings);
         console.log("save auth successfully");
         } catch(error) {
